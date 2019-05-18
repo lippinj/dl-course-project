@@ -87,12 +87,9 @@ print('Average ratings per customer: {:.2f}.'.format(float(num_points) / num_cus
 #####################
 
 t0 = time.time()
-
 filename_mr = 'mean_ratings_{}.npy'.format(customers_str)
-mean = np.load(filename_mr)
+tally, total, mean, mean_all = np.load(filename_mr)
 mean = mean[np.array(data[:,1], dtype=np.int)]
-mean_all = np.mean(mean)
-
 t1 = time.time()
 
 print('Read means from {} in {:.1f} s.'.format(filename_mr, t1 - t0))
@@ -198,7 +195,7 @@ def train(num_epochs, lrs=[1e-1, 1e-1, 1e-1], batch_size=10000):
 ######################
 
 L = []
-L += train(100, [2e-1, 2e-1, 2e-1], 8192)
+L += train(25, [2e-1, 2e-1, 2e-1], 8192)
 
 print(SPACER)
 

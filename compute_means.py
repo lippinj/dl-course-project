@@ -64,31 +64,30 @@ t0 = time.time()
 
 sum_all = 0.0
 count_all = 0.0
-sums = np.zeros(num_movies)
-counts = np.zeros(num_movies)
+tally = np.zeros((num_movies, 5))
 
-for i in range(train.shape[0]):
+for i in range(num_train_points):
     mid = int(train[i,1])
-    rating = train[i,2]
-    sums[mid] += rating
-    counts[mid] += 1.0
-    sum_all += rating
-    count_all += 1.0
+    rating = int(train[i,2])
+    tally[mid,rating-1] += 1.0
 
-mean_all = sum_all / count_all
+total = np.sum(tally, axis=0)
+total /= np.sum(total)
+
 for i in range(num_movies):
-    if counts[i] == 0.0:
-        counts[i] = 1.0
-        sums[i] = mean_all
+    if np.sum(tally[i,:]) == 0.0:
+        tally[i,:] = total
 
-means = sums / counts
+tally /= np.sum(tally, axis=1)[:,None]
+means = np.dot(tally, np.arange(1, 6))
+mean_all = np.dot(total, np.arange(1, 6))
 
 t1 = time.time()
 print('Calculated means in {:.1f} s.'.format(t1 - t0))
 print('Overall mean is {:.4f}'.format(mean_all))
 
 filename_mr = 'mean_ratings_{}.npy'.format(customers_str)
-np.save(filename_mr, means)
+np.save(filename_mr, (tally, total, means, mean_all))
 print('Saved means to {}'.format(filename_mr))
 
 ####################

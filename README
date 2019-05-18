@@ -9,8 +9,8 @@ Example run:
     python preprocess.py
     python split_data.py 100k
     python compute_means.py 100k
-    python train_naive.py cuda 100k
-    python validate.py 100k
+    python train_naive_2.py cuda 100k
+    python validate_2.py 100k
 
 Valid customer limits:
     1k

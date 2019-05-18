@@ -87,8 +87,11 @@ print('Calculated means in {:.1f} s.'.format(t1 - t0))
 print('Overall mean is {:.4f}'.format(mean_all))
 
 filename_mr = 'mean_ratings_{}.npy'.format(customers_str)
-np.save(filename_mr, (tally, total, means, mean_all))
+filename_ta = 'tally_{}.npy'.format(customers_str)
+np.save(filename_mr, means)
 print('Saved means to {}'.format(filename_mr))
+np.save(filename_ta, tally)
+print('Saved tally to {}'.format(filename_ta))
 
 ####################
 # Calculate errors #

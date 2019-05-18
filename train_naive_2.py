@@ -19,14 +19,14 @@ import torch.nn.functional as F
 #
 # The following file(s) are read:
 #  train_[#].npy
-#  mean_ratings_[#].npy
+#  tally_[#].npy
 #
 # The following file(s) are created:
-#  results/train_naive_[#]_[#.####]_[#.####].png
-#  results/train_naive_[#]_[#.####]_[#.####].losses.npy
-#  naive_me_[#].pth
-#  naive_ce_[#].pth
-#  naive_pa_[#].pth
+#  results/train_naive_2_[#]_[#.####]_[#.####].png
+#  results/train_naive_2_[#]_[#.####]_[#.####].losses.npy
+#  naive_2_me_[#].pth
+#  naive_2_ce_[#].pth
+#  naive_2_pa_[#].pth
 #
 # Run examples:
 #  python train_naive.py cpu 10k
@@ -38,7 +38,7 @@ import torch.nn.functional as F
 ######################
 
 SPACER = '=' * 78
-print('========================= Training: Naive embeddings ========================')
+print('======================= Training: Naive embeddings v2 ====================')
 
 assert(len(sys.argv) in (3, 4))
 device_str = sys.argv[1]
@@ -87,20 +87,21 @@ print('Average ratings per customer: {:.2f}.'.format(float(num_points) / num_cus
 #####################
 
 t0 = time.time()
-filename_mr = 'mean_ratings_{}.npy'.format(customers_str)
-mean = np.load(filename_mr)
-mean = mean[np.array(data[:,1], dtype=np.int)]
+filename_ta = 'tally_{}.npy'.format(customers_str)
+tally = np.load(filename_ta)
+tally = np.log(tally)
+tally = tally[np.array(data[:,1], dtype=np.int)]
 t1 = time.time()
 
-print('Read means from {} in {:.1f} s.'.format(filename_mr, t1 - t0))
+print('Read tally from {} in {:.1f} s.'.format(filename_ta, t1 - t0))
 
 #######################
 # Model specification #
 #######################
 
-filename_me = 'naive_me_{}.pth'.format(customers_str)
-filename_ce = 'naive_ce_{}.pth'.format(customers_str)
-filename_pa = 'naive_pa_{}.pth'.format(customers_str)
+filename_me = 'naive_2_me_{}.pth'.format(customers_str)
+filename_ce = 'naive_2_ce_{}.pth'.format(customers_str)
+filename_pa = 'naive_2_pa_{}.pth'.format(customers_str)
 
 dim_customers = 20 # customer embedding dimensions
 dim_movies = 20 # movie embedding dimensions
@@ -112,15 +113,15 @@ predict_appeal = nn.Sequential(
         nn.ReLU(),
         nn.Linear(100, 100),
         nn.Tanh(),
-        nn.Linear(100, 10),
+        nn.Linear(100, 20),
         nn.Tanh(),
-        nn.Linear(10, 1),
+        nn.Linear(20, 5)
     ).to(device)
 
 if extra == 'continue':
     t0 = time.time()
     movie_embedding.load_state_dict(torch.load(filename_me))
-    customer_embedding .load_state_dict(torch.load(filename_ce))
+    customer_embedding.load_state_dict(torch.load(filename_ce))
     predict_appeal.load_state_dict(torch.load(filename_pa))
     t1 = time.time()
     print('Loaded models in {:.1f} s'.format(t1 - t0))
@@ -158,15 +159,17 @@ def train(num_epochs, lrs=[1e-1, 1e-1, 1e-1], batch_size=10000):
             customer_ids = torch.tensor(data[J,0], dtype=torch.long, device=device).view(B)
             movie_ids    = torch.tensor(data[J,1], dtype=torch.long, device=device).view(B)
             ratings      = torch.tensor(data[J,2], dtype=torch.float, device=device).view(B)
-            mean_ratings = torch.tensor(mean[J], dtype=torch.float, device=device).view(B)
+            logdists     = torch.tensor(tally[J], dtype=torch.float, device=device).view(B, 5)
 
             for opt in opts:
                 opt.zero_grad()
 
             m = movie_embedding(movie_ids)
             c = customer_embedding(customer_ids)
-            a = predict_appeal(torch.cat((c, m), dim=1)).view(B)
-            p = F.hardtanh(mean_ratings + a, 1.0, 5.0)
+
+            appeal = predict_appeal(torch.cat((c, m), dim=1)).view(B, 5)
+            dist = F.softmax(logdists + appeal, dim=1)
+            p = torch.mm(dist, torch.tensor([1., 2., 3., 4., 5.], device=device).view(5, 1)).view(B)
 
             loss = criterion(p, ratings)
             loss.backward()
@@ -203,8 +206,8 @@ print(SPACER)
 ##################
 
 start_rmse = np.sqrt(L[0])
-end_rmse = np.sqrt(L[-1])
-tag = 'train_naive_{}_{:.5f}_{:.5f}'.format(customers_str, start_rmse, end_rmse)
+end_rmse = np.sqrt(L[1])
+tag = 'train_naive_2_{}_{:.5f}_{:.5f}'.format(customers_str, start_rmse, end_rmse)
 filename_plot = 'results/{}.png'.format(tag)
 filename_losses = 'results/{}.losses.npy'.format(tag)
 

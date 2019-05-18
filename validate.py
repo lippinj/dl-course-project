@@ -9,9 +9,21 @@ import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
 
+
+# Calculates the validation error.
+#
+# The following file(s) are read:
+#  mean_ratings_[#].npy
+#  validate_[#].npy
+#  naive_me_[#].pth
+#  naive_ce_[#].pth
+#  naive_pa_[#].pth
+#
+# Run examples:
+#  python validate.py 10k
+#  python validate.py all
 
 ######################
 # Parse command line #

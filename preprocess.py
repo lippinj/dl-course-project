@@ -12,7 +12,7 @@ import numpy as np
 # In addition, the customerIDs will be contiguous (which they aren't
 # in the original data).
 #
-# The following file is created:
+# The following fil(s) are created:
 #  data.npy
 #
 # Run examples:

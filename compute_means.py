@@ -8,7 +8,10 @@ import numpy as np
 # and calculates the training and validation error when each movie's
 # rating is predicted to be simply its mean.
 
-# The following file is created:
+# The following file(s) are read:
+#  train_[#].npy
+#
+# The following file(s) are created:
 #  mean_ratings_[#].npy
 #
 # Run examples:

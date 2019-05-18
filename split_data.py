@@ -7,7 +7,10 @@ import numpy as np
 # This script splits data from data.npy into training and validation
 # data sets, considering only customer IDs below the given limit.
 #
-# The following files are created:
+# The following file(s) are read:
+#  data.npy
+#
+# The following file(s) are created:
 #  train_[#].npy
 #  validate_[#].npy
 #

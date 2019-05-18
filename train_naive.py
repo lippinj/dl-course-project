@@ -13,6 +13,26 @@ import torch.optim as optim
 import torch.nn.functional as F
 
 
+# Train the models. Change the "Training execution" part to adjust
+# number of epochs etc. Use "continue" to load a previously trained
+# model and keep training it.
+#
+# The following file(s) are read:
+#  train_[#].npy
+#  mean_ratings_[#].npy
+#
+# The following file(s) are created:
+#  results/train_naive_[#]_[#.####]_[#.####].png
+#  results/train_naive_[#]_[#.####]_[#.####].losses.npy
+#  naive_me_[#].pth
+#  naive_ce_[#].pth
+#  naive_pa_[#].pth
+#
+# Run examples:
+#  python train_naive.py cpu 10k
+#  python train_naive.py cuda all
+#  python train_naive.py cuda all continue
+
 ######################
 # Parse command line #
 ######################
@@ -178,7 +198,7 @@ def train(num_epochs, lrs=[1e-1, 1e-1, 1e-1], batch_size=10000):
 ######################
 
 L = []
-L += train(100, [1e-0, 1e-0, 1e-0], 8192)
+L += train(100, [2e-1, 2e-1, 2e-1], 8192)
 
 print(SPACER)
 
@@ -202,10 +222,6 @@ plt.xlabel('Epochs')
 plt.ylabel('RMSE')
 plt.savefig(filename_plot)
 print('Plot saved to {}'.format(filename_plot))
-
-filename_me = 'naive_me_{}.pth'.format(customers_str)
-filename_ce = 'naive_ce_{}.pth'.format(customers_str)
-filename_rp = 'naive_rp_{}.pth'.format(customers_str)
 
 while True:
     command = input('[s]ave or [q]uit? ')

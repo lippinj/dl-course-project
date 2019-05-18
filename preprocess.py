@@ -3,15 +3,21 @@ import numpy as np
 
 
 # This script reads the data from the data/ folder into a .npy file,
-# for convenience. The file will contain a matrix like:
+# which is faster to load. The file will contain a matrix
+# like:
 #  [[customerID, movieID, rating]
 #   [customerID, movieID, rating]
 #                ...
 #   [customerID, movieID, rating]]
+# In addition, the customerIDs will be contiguous (which they aren't
+# in the original data).
+#
+# The following file is created:
+#  data.npy
 #
 # Run examples:
-#  python preprocess.py 10k
-#  python preprocess.py all
+#  python preprocess.py
+#  python preprocess.py
 
 ##################
 # Read full data #

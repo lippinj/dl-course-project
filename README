@@ -1,0 +1,21 @@
+Place the Netflix prize data in the data/ folder. It can be downloaded
+from Kaggle:
+https://www.kaggle.com/netflix-inc/netflix-prize-data
+
+Change the training settings by editing train_naive.py. Training loss
+evolution is saved to the results/ folder.
+
+Example run:
+    python preprocess.py
+    python split_data.py 100k
+    python compute_means.py 100k
+    python train_naive.py cuda 100k
+    python validate.py 100k
+
+Valid customer limits:
+    1k
+    10k
+    25k
+    100k
+    all
+

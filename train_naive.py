@@ -55,14 +55,9 @@ print(SPACER)
 filename_data = 'train_{}.npy'.format(customers_str)
 
 t0 = time.time()
-data          = np.load(filename_data)
-customer_ids0 = torch.tensor(data[:,0], dtype=torch.long, device=device).view(-1)
-movie_ids0    = torch.tensor(data[:,1], dtype=torch.long, device=device).view(-1)
-ratings0      = torch.tensor(data[:,2], dtype=torch.float, device=device).view(-1)
-num_points    = data.shape[0]
+data       = np.load(filename_data)
+num_points = data.shape[0]
 t1 = time.time()
-
-del data
 
 print('Read {:,} data points from {} in {:.1f} s.'.format(num_points, filename_data, t1 - t0))
 print('Average ratings per customer: {:.2f}.'.format(float(num_points) / num_customers))
@@ -74,9 +69,9 @@ print('Average ratings per customer: {:.2f}.'.format(float(num_points) / num_cus
 t0 = time.time()
 
 filename_mr = 'mean_ratings_{}.npy'.format(customers_str)
-mean_ratings0 = torch.tensor(np.load(filename_mr), dtype=torch.float, device=device)
-mean_ratings0 = mean_ratings0[movie_ids0]
-mean_all = torch.mean(mean_ratings0)
+mean = np.load(filename_mr)
+mean = mean[np.array(data[:,1], dtype=np.int)]
+mean_all = np.mean(mean)
 
 t1 = time.time()
 
@@ -133,7 +128,8 @@ def train(num_epochs, lrs=[1e-1, 1e-1, 1e-1], batch_size=10000):
     for i_epoch in range(num_epochs):
         # Epoch start.
         t0 = time.time()
-        I = torch.randperm(num_points, device=device)
+        # I = torch.randperm(num_points, device=device)
+        I = np.random.choice(num_points, num_points, replace=False)
 
         i = 0
         sum_square_error = 0.0
@@ -143,10 +139,10 @@ def train(num_epochs, lrs=[1e-1, 1e-1, 1e-1], batch_size=10000):
             J = I[i:j]
             B = j - i
 
-            customer_ids = customer_ids0[J]
-            movie_ids = movie_ids0[J]
-            ratings = ratings0[J]
-            mean_ratings = mean_ratings0[J]
+            customer_ids = torch.tensor(data[J,0], dtype=torch.long, device=device).view(B)
+            movie_ids    = torch.tensor(data[J,1], dtype=torch.long, device=device).view(B)
+            ratings      = torch.tensor(data[J,2], dtype=torch.float, device=device).view(B)
+            mean_ratings = torch.tensor(mean[J], dtype=torch.float, device=device).view(B)
 
             for opt in opts:
                 opt.zero_grad()
@@ -182,7 +178,7 @@ def train(num_epochs, lrs=[1e-1, 1e-1, 1e-1], batch_size=10000):
 ######################
 
 L = []
-L += train(100, [2e-1, 2e-1, 2e-1], 8192)
+L += train(100, [1e-0, 1e-0, 1e-0], 8192)
 
 print(SPACER)
 
